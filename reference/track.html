@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track – geolib Reference</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> <a href="index.html">Reference</a>
+        <span>›</span> Track
+    </div>
+
+    <h1>Track</h1>
+    <p>
+        An ordered sequence of geographic points that represents a continuous journey, route,
+        or path—such as a hike, a bike ride, or a drive. A <code>Track</code> may contain
+        <a href="point2d.html"><code>Point2D</code></a> or
+        <a href="point3d.html"><code>Point3D</code></a> points (or a mix of both).
+    </p>
+    <p>
+        Elevation-related methods (<code>elevation_gain</code>, <code>elevation_loss</code>,
+        <code>highest_point</code>, <code>lowest_point</code>) are only meaningful when the track
+        contains <code>Point3D</code> points.
+    </p>
+
+    <!-- ── Constructor ── -->
+    <h2>Constructor</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span>
+            <span class="sig-name">Track</span>(<span class="sig-param">points: list[Point2D]</span>,
+            <span class="sig-param">name: str = None</span>)
+        </div>
+        <div class="method-body">
+            <p>Create a track from an ordered list of geographic points.</p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><code>points</code></td>
+                        <td><span class="badge badge-type">list[Point2D]</span></td>
+                        <td>
+                            At least 2 geographic points in traversal order.
+                            May contain <code>Point3D</code> values.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>name</code></td>
+                        <td><span class="badge badge-type">str</span> <span class="badge badge-opt">optional</span></td>
+                        <td>A human-readable name for the track (e.g. from a GPX file). Defaults to <code>None</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Raises:</strong> <code>ValueError</code> if fewer than 2 points are supplied.</p>
+            <pre><code>hike = Track([
+    Point3D(<span class="nm">49.28</span>, <span class="nm">-123.12</span>, <span class="nm">0</span>),
+    Point3D(<span class="nm">49.30</span>, <span class="nm">-123.15</span>, <span class="nm">120</span>),
+    Point3D(<span class="nm">49.32</span>, <span class="nm">-123.18</span>, <span class="nm">350</span>),
+], name=<span class="st">"Grouse Grind"</span>)</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Properties ── -->
+    <h2>Properties</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">points</span> → <span class="sig-ret">tuple[Point2D, ...]</span>
+        </div>
+        <div class="method-body">
+            <p>An immutable sequence of the track's points in traversal order. Read-only.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">name</span> → <span class="sig-ret">str | None</span>
+        </div>
+        <div class="method-body">
+            <p>The name of the track, or <code>None</code> if none was provided. Read-only.</p>
+        </div>
+    </div>
+
+    <!-- ── Distance Methods ── -->
+    <h2>Distance Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">total_distance</span>() → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the total length of the track in <strong>metres</strong>, calculated as
+                the sum of the distances between all consecutive point pairs.
+                For <code>Point3D</code> tracks the distance between each consecutive pair accounts
+                for elevation change (3-D Euclidean distance).
+            </p>
+            <pre><code>hike.total_distance()   <span class="cm"># total path length, metres</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">segment_distances</span>() → <span class="sig-ret">list[float]</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns a list of distances (in <strong>metres</strong>) between each consecutive
+                pair of points. The list has <code>len(track.points) − 1</code> elements.
+            </p>
+            <pre><code>hike.segment_distances()
+<span class="cm"># [2134.2, 3021.5, ...]  one distance per consecutive pair</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">bounding_box</span>() → <span class="sig-ret">BoundingBox</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the smallest <a href="boundingbox.html"><code>BoundingBox</code></a> that
+                encloses all of the track's points.
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Elevation Methods ── -->
+    <h2>Elevation Methods</h2>
+
+    <p>
+        These methods require the track's points to be
+        <a href="point3d.html"><code>Point3D</code></a> instances. If any point lacks an
+        elevation (i.e. is a plain <code>Point2D</code>), that point is skipped in the
+        calculation. If <em>no</em> points have elevation, the method returns <code>0.0</code>.
+    </p>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">elevation_gain</span>() → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the total uphill elevation gain in <strong>metres</strong>—the sum of all
+                positive elevation differences between consecutive <code>Point3D</code> points.
+            </p>
+            <pre><code>hike.elevation_gain()   <span class="cm"># e.g. 350.0 m</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">elevation_loss</span>() → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the total downhill elevation loss in <strong>metres</strong> as a
+                positive number—the sum of the absolute values of all negative elevation
+                differences between consecutive <code>Point3D</code> points.
+            </p>
+            <pre><code>hike.elevation_loss()   <span class="cm"># e.g. 70.0 m</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">highest_point</span>() → <span class="sig-ret">Point3D | None</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the <code>Point3D</code> in the track that has the greatest elevation.
+                If no <code>Point3D</code> points exist in the track, returns <code>None</code>.
+                If multiple points share the maximum elevation, the first one (in traversal order)
+                is returned.
+            </p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">lowest_point</span>() → <span class="sig-ret">Point3D | None</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the <code>Point3D</code> in the track with the smallest elevation.
+                Returns <code>None</code> if no <code>Point3D</code> points exist. If multiple
+                points share the minimum elevation, the first one is returned.
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Utility Methods ── -->
+    <h2>Utility Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">simplify</span>(<span class="sig-param">tolerance: float</span>) → <span class="sig-ret">Track</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns a new <code>Track</code> with fewer points that still approximates the
+                shape of the original path, using the
+                <a href="https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm"
+                   target="_blank" rel="noopener">Ramer–Douglas–Peucker algorithm</a>.
+                The first and last points are always preserved.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><code>tolerance</code></td>
+                        <td><span class="badge badge-type">float</span></td>
+                        <td>
+                            Maximum allowable perpendicular distance in <strong>metres</strong>
+                            between a removed point and the simplified path. A larger tolerance
+                            removes more points; a tolerance of 0 returns an identical copy.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> A new <code>Track</code> with the same <code>name</code>.</p>
+            <pre><code>simplified = hike.simplify(tolerance=<span class="nm">20</span>)
+<span class="bi">print</span>(<span class="bi">len</span>(hike.points), <span class="st">"→"</span>, <span class="bi">len</span>(simplified.points))</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Special Methods ── -->
+    <h2>Special Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__len__</span>() → <span class="sig-ret">int</span>
+        </div>
+        <div class="method-body">
+            <p>Returns the number of points in the track. Allows <code>len(track)</code>.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__iter__</span>()
+        </div>
+        <div class="method-body">
+            <p>Iterates over the track's points in order. Allows <code>for p in track: ...</code>.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__repr__</span>() → <span class="sig-ret">str</span>
+        </div>
+        <div class="method-body">
+            <p>Returns a string such as <code>Track(name='Grouse Grind', points=142)</code>.</p>
+        </div>
+    </div>
+
+    <h2>See Also</h2>
+    <ul>
+        <li><a href="gpxdata.html">GpxData.tracks</a> — list of <code>Track</code> objects from a GPX file</li>
+        <li><a href="point2d.html">Point2D</a> — 2-D point type</li>
+        <li><a href="point3d.html">Point3D</a> — 3-D point type (required for elevation methods)</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

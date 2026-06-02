@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point2D – geolib Reference</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> <a href="index.html">Reference</a>
+        <span>›</span> Point2D
+    </div>
+
+    <h1>Point2D</h1>
+    <p>
+        A two-dimensional geographic coordinate consisting of a latitude and a longitude.
+        <code>Point2D</code> is the fundamental type in geolib; most functions accept (or return)
+        a <code>Point2D</code> or its subclass <a href="point3d.html"><code>Point3D</code></a>.
+    </p>
+
+    <div class="callout callout-note">
+        <p>
+            <strong>Valid ranges:</strong>
+            <code>latitude</code> must be in [−90, 90].
+            <code>longitude</code> must be in [−180, 180].
+            Constructing a <code>Point2D</code> with out-of-range values raises
+            <a href="index.html#exceptions"><code>InvalidCoordinateError</code></a>.
+        </p>
+    </div>
+
+    <!-- ── Constructor ── -->
+    <h2>Constructor</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span>
+            <span class="sig-name">Point2D</span>(<span class="sig-param">latitude: float</span>,
+            <span class="sig-param">longitude: float</span>)
+        </div>
+        <div class="method-body">
+            <p>Create a 2-D geographic point.</p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>latitude</code></td><td><span class="badge badge-type">float</span></td><td>Degrees north (+) or south (−) of the equator. Range: −90 to 90.</td></tr>
+                    <tr><td><code>longitude</code></td><td><span class="badge badge-type">float</span></td><td>Degrees east (+) or west (−) of the prime meridian. Range: −180 to 180.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Raises:</strong> <a href="index.html#exceptions"><code>InvalidCoordinateError</code></a> if either value is out of range.</p>
+            <pre><code>paris = Point2D(<span class="nm">48.8566</span>, <span class="nm">2.3522</span>)</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Properties ── -->
+    <h2>Properties</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">latitude</span> → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>The latitude of this point in degrees. Read-only.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">longitude</span> → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>The longitude of this point in degrees. Read-only.</p>
+        </div>
+    </div>
+
+    <!-- ── Methods ── -->
+    <h2>Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">distance_to</span>(<span class="sig-param">other: Point2D</span>) → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the great-circle (Haversine) distance between this point and
+                <code>other</code>, in <strong>metres</strong>.
+                If both points are <a href="point3d.html"><code>Point3D</code></a> instances, the
+                returned value is the straight-line 3-D distance that also accounts for elevation
+                difference.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>other</code></td><td><span class="badge badge-type">Point2D</span></td><td>The point to measure the distance to. May be a <code>Point3D</code>.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> Distance in metres (<code>float</code>).</p>
+            <pre><code>paris.distance_to(london)   <span class="cm"># 341 571.7 (metres)</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">bearing_to</span>(<span class="sig-param">other: Point2D</span>) → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the initial compass bearing from this point toward <code>other</code>,
+                in <strong>degrees</strong> (0 = North, 90 = East, 180 = South, 270 = West).
+                The value is always in [0, 360).
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>other</code></td><td><span class="badge badge-type">Point2D</span></td><td>The target point.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> Bearing in degrees (<code>float</code>), in [0, 360).</p>
+            <pre><code>paris.bearing_to(london)   <span class="cm"># 334.0 (north-northwest)</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">midpoint</span>(<span class="sig-param">other: Point2D</span>) → <span class="sig-ret">Point2D</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the geographic midpoint on the great circle between this point and
+                <code>other</code>. The returned point is always a <code>Point2D</code> (elevation
+                is not interpolated even if both operands are <code>Point3D</code>).
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>other</code></td><td><span class="badge badge-type">Point2D</span></td><td>The other endpoint.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> A new <code>Point2D</code>.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">translate</span>(<span class="sig-param">distance: float</span>,
+            <span class="sig-param">bearing: float</span>) → <span class="sig-ret">Point2D</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns a new <code>Point2D</code> that is <code>distance</code> metres away from
+                this point in the direction of <code>bearing</code>. Uses the Haversine formula
+                (spherical Earth).
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>distance</code></td><td><span class="badge badge-type">float</span></td><td>Distance to travel, in metres. Must be ≥ 0.</td></tr>
+                    <tr><td><code>bearing</code></td><td><span class="badge badge-type">float</span></td><td>Direction of travel, in degrees (0 = North).</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> A new <code>Point2D</code>.</p>
+            <pre><code><span class="cm"># 1 km north of Paris</span>
+north = paris.translate(<span class="nm">1000</span>, <span class="nm">0</span>)</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Dunder methods ── -->
+    <h2>Special Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__eq__</span>(<span class="sig-param">other: object</span>) → <span class="sig-ret">bool</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns <code>True</code> if <code>other</code> is a <code>Point2D</code> with the
+                same <code>latitude</code> and <code>longitude</code> (exact float equality).
+                For approximate comparisons, compare <code>distance_to(other) &lt; threshold</code>.
+            </p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__repr__</span>() → <span class="sig-ret">str</span>
+        </div>
+        <div class="method-body">
+            <p>Returns a human-readable string such as <code>Point2D(lat=48.8566, lon=2.3522)</code>.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__hash__</span>() → <span class="sig-ret">int</span>
+        </div>
+        <div class="method-body">
+            <p>
+                <code>Point2D</code> objects are hashable and can be used as dictionary keys or in
+                sets. Two points that are equal (via <code>__eq__</code>) have the same hash.
+            </p>
+        </div>
+    </div>
+
+    <h2>See Also</h2>
+    <ul>
+        <li><a href="point3d.html">Point3D</a> — adds elevation to <code>Point2D</code></li>
+        <li><a href="boundingbox.html">BoundingBox</a> — rectangular region that can test point containment</li>
+        <li><a href="polygon.html">Polygon</a> — arbitrary polygon containment</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

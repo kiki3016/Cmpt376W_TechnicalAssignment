@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GpxParser – geolib Reference</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> <a href="index.html">Reference</a>
+        <span>›</span> GpxParser
+    </div>
+
+    <h1>GpxParser</h1>
+    <p>
+        Reads GPX (GPS Exchange Format) data from a file or string and returns a
+        <a href="gpxdata.html"><code>GpxData</code></a> object containing the parsed tracks,
+        waypoints, and routes.
+    </p>
+    <p>
+        GPX is an XML-based format produced by GPS devices, fitness trackers (Fitbit, Garmin,
+        Apple Watch), and mapping applications. <code>GpxParser</code> supports GPX version 1.1
+        (the current standard) and GPX version 1.0.
+    </p>
+
+    <div class="callout callout-note">
+        <p>
+            <strong>Instantiation:</strong> <code>GpxParser</code> contains only static methods;
+            you do not need to create an instance. Call <code>GpxParser.parse(...)</code> directly.
+        </p>
+    </div>
+
+    <!-- ── Static Methods ── -->
+    <h2>Static Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-kw">@staticmethod</span><br>
+            <span class="sig-name">parse</span>(<span class="sig-param">filename: str</span>) → <span class="sig-ret">GpxData</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Reads and parses a GPX file from disk. Elevation data (<code>&lt;ele&gt;</code>)
+                is used when present; track points without elevation become
+                <a href="point2d.html"><code>Point2D</code></a> objects while those with elevation
+                become <a href="point3d.html"><code>Point3D</code></a> objects.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><code>filename</code></td>
+                        <td><span class="badge badge-type">str</span></td>
+                        <td>Path to the GPX file. Absolute or relative to the current working directory.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> A <a href="gpxdata.html"><code>GpxData</code></a> object.</p>
+            <p><strong>Raises:</strong></p>
+            <ul>
+                <li><code>FileNotFoundError</code> — if the file does not exist.</li>
+                <li><a href="index.html#exceptions"><code>GpxParseError</code></a> — if the file is not valid GPX XML or is missing required elements.</li>
+            </ul>
+            <pre><code>data = GpxParser.parse(<span class="st">"my_run.gpx"</span>)
+
+<span class="bi">print</span>(<span class="st">f"Tracks:    {len(data.tracks)}"</span>)
+<span class="bi">print</span>(<span class="st">f"Waypoints: {len(data.waypoints)}"</span>)
+
+track = data.tracks[<span class="nm">0</span>]
+<span class="bi">print</span>(<span class="st">f"Distance:  {track.total_distance() / 1000:.2f} km"</span>)</code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-kw">@staticmethod</span><br>
+            <span class="sig-name">parse_string</span>(<span class="sig-param">xml_content: str</span>) → <span class="sig-ret">GpxData</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Parses GPX data from an in-memory string. Useful when GPX content has been
+                downloaded from the network, extracted from a ZIP archive, or generated
+                programmatically.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><code>xml_content</code></td>
+                        <td><span class="badge badge-type">str</span></td>
+                        <td>A string containing valid GPX XML.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> A <a href="gpxdata.html"><code>GpxData</code></a> object.</p>
+            <p><strong>Raises:</strong> <a href="index.html#exceptions"><code>GpxParseError</code></a> if the string is not valid GPX.</p>
+            <pre><code><span class="kw">import</span> urllib.request
+
+<span class="kw">with</span> urllib.request.urlopen(<span class="st">"https://example.com/route.gpx"</span>) <span class="kw">as</span> r:
+    xml = r.read().decode()
+
+data = GpxParser.parse_string(xml)</code></pre>
+        </div>
+    </div>
+
+    <!-- ── GPX format notes ── -->
+    <h2>GPX Format Notes</h2>
+    <p>
+        A GPX file can contain three types of geographic data, all of which geolib reads:
+    </p>
+    <ul>
+        <li>
+            <strong>Tracks (<code>&lt;trk&gt;</code>):</strong> A track is an ordered sequence of
+            recorded positions, typically from a GPS receiver. Each track is returned as a
+            <a href="track.html"><code>Track</code></a>. A GPX file may contain multiple tracks
+            (e.g. separate days of a multi-day hike).
+        </li>
+        <li>
+            <strong>Waypoints (<code>&lt;wpt&gt;</code>):</strong> Named locations of interest
+            (trailheads, summits, etc.). Each waypoint is returned as a
+            <a href="point2d.html"><code>Point2D</code></a> or
+            <a href="point3d.html"><code>Point3D</code></a>.
+        </li>
+        <li>
+            <strong>Routes (<code>&lt;rte&gt;</code>):</strong> Planned paths created by the user
+            (rather than recorded from live movement). Each route is returned as a
+            <a href="track.html"><code>Track</code></a>.
+        </li>
+    </ul>
+
+    <div class="callout callout-note">
+        <p>
+            <strong>Track segments:</strong> GPX tracks may contain multiple
+            <code>&lt;trkseg&gt;</code> segments (e.g. when a GPS device lost signal and then
+            resumed). geolib concatenates all segments within a single <code>&lt;trk&gt;</code>
+            element into one <code>Track</code> object. If you need to handle gaps between
+            segments, inspect <code>segment_distances()</code> for unusually large jumps.
+        </p>
+    </div>
+
+    <h2>See Also</h2>
+    <ul>
+        <li><a href="gpxdata.html">GpxData</a> — the container returned by <code>GpxParser</code></li>
+        <li><a href="track.html">Track</a> — represents a parsed GPX track or route</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

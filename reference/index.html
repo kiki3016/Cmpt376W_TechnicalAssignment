@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference – geolib</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> API Reference
+    </div>
+
+    <h1>API Reference</h1>
+    <p>
+        Complete documentation for every class and method in geolib.
+        All distances are in <strong>metres</strong>, all angles in <strong>degrees</strong>,
+        and all elevations in <strong>metres above datum</strong>.
+    </p>
+
+    <h2>Classes</h2>
+
+    <div class="card-grid">
+        <a class="card" href="point2d.html">
+            <div class="card-icon">📍</div>
+            <h3>Point2D</h3>
+            <p>2-D geographic coordinate (latitude, longitude).</p>
+        </a>
+        <a class="card" href="point3d.html">
+            <div class="card-icon">🗻</div>
+            <h3>Point3D</h3>
+            <p>3-D geographic coordinate that adds elevation to <code>Point2D</code>.</p>
+        </a>
+        <a class="card" href="boundingbox.html">
+            <div class="card-icon">🔲</div>
+            <h3>BoundingBox</h3>
+            <p>Axis-aligned geographic rectangle for spatial queries.</p>
+        </a>
+        <a class="card" href="polygon.html">
+            <div class="card-icon">🗺️</div>
+            <h3>Polygon</h3>
+            <p>Closed geographic region defined by ordered vertices.</p>
+        </a>
+        <a class="card" href="track.html">
+            <div class="card-icon">🛤️</div>
+            <h3>Track</h3>
+            <p>Ordered sequence of points describing a journey.</p>
+        </a>
+        <a class="card" href="gpxparser.html">
+            <div class="card-icon">📂</div>
+            <h3>GpxParser</h3>
+            <p>Parses GPX files into structured <code>GpxData</code>.</p>
+        </a>
+        <a class="card" href="gpxdata.html">
+            <div class="card-icon">📦</div>
+            <h3>GpxData</h3>
+            <p>Data container returned by <code>GpxParser</code>.</p>
+        </a>
+    </div>
+
+    <h2>Class Hierarchy</h2>
+    <pre><code>Point2D
+└── Point3D</code></pre>
+    <p>All other classes are standalone.</p>
+
+    <h2>Exceptions</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span> <span class="sig-name">GeolibError</span>(Exception)
+        </div>
+        <div class="method-body">
+            <p>Base class for all geolib exceptions. Catch this to handle any geolib error generically.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span> <span class="sig-name">InvalidCoordinateError</span>(GeolibError)
+        </div>
+        <div class="method-body">
+            <p>
+                Raised when a latitude, longitude, or elevation value is outside its valid range:
+                latitude must be −90 to 90, longitude −180 to 180.
+            </p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span> <span class="sig-name">GpxParseError</span>(GeolibError)
+        </div>
+        <div class="method-body">
+            <p>Raised when a GPX file or string cannot be parsed (malformed XML, missing required elements, etc.).</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>
