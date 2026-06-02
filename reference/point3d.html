@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point3D – geolib Reference</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> <a href="index.html">Reference</a>
+        <span>›</span> Point3D
+    </div>
+
+    <h1>Point3D</h1>
+    <p>
+        A three-dimensional geographic coordinate that extends <a href="point2d.html"><code>Point2D</code></a>
+        with an <strong>elevation</strong> value (metres above datum, approximately sea level).
+        <code>Point3D</code> is a subclass of <code>Point2D</code>, so it is accepted everywhere
+        a <code>Point2D</code> is expected.
+    </p>
+
+    <div class="callout callout-note">
+        <p>
+            <strong>Elevation vs altitude:</strong> Elevation is measured relative to the
+            WGS-84 geoid (approximately sea level), not the ground surface. A negative
+            elevation indicates a point below sea level (e.g. the Dead Sea shores at roughly −430 m).
+        </p>
+    </div>
+
+    <!-- ── Constructor ── -->
+    <h2>Constructor</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span>
+            <span class="sig-name">Point3D</span>(<span class="sig-param">latitude: float</span>,
+            <span class="sig-param">longitude: float</span>,
+            <span class="sig-param">elevation: float</span>)
+        </div>
+        <div class="method-body">
+            <p>Create a 3-D geographic point.</p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>latitude</code></td><td><span class="badge badge-type">float</span></td><td>Degrees north (+) or south (−). Range: −90 to 90.</td></tr>
+                    <tr><td><code>longitude</code></td><td><span class="badge badge-type">float</span></td><td>Degrees east (+) or west (−). Range: −180 to 180.</td></tr>
+                    <tr><td><code>elevation</code></td><td><span class="badge badge-type">float</span></td><td>Height above datum in metres. May be negative.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Raises:</strong> <a href="index.html#exceptions"><code>InvalidCoordinateError</code></a> if latitude or longitude is out of range.</p>
+            <pre><code>summit = Point3D(<span class="nm">45.8326</span>, <span class="nm">6.8652</span>, <span class="nm">4808.0</span>)   <span class="cm"># Mont Blanc</span></code></pre>
+        </div>
+    </div>
+
+    <!-- ── Properties ── -->
+    <h2>Properties</h2>
+
+    <p>Inherits <code>latitude</code> and <code>longitude</code> from <a href="point2d.html"><code>Point2D</code></a>.</p>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">elevation</span> → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>The elevation of this point in metres above datum. Read-only. May be negative.</p>
+        </div>
+    </div>
+
+    <!-- ── Overridden Methods ── -->
+    <h2>Overridden Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">distance_to</span>(<span class="sig-param">other: Point2D</span>) → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the distance between this point and <code>other</code> in <strong>metres</strong>.
+            </p>
+            <ul>
+                <li>If <code>other</code> is a <code>Point3D</code>: returns the straight-line
+                    3-D Euclidean distance, computed as
+                    <code>sqrt(great_circle² + elevation_diff²)</code>.</li>
+                <li>If <code>other</code> is a plain <code>Point2D</code>: falls back to the
+                    great-circle (Haversine) distance, ignoring elevation.</li>
+            </ul>
+            <pre><code>base  = Point3D(<span class="nm">45.83</span>, <span class="nm">6.86</span>, <span class="nm">1000.0</span>)
+summit = Point3D(<span class="nm">45.83</span>, <span class="nm">6.87</span>, <span class="nm">4808.0</span>)
+base.distance_to(summit)   <span class="cm"># includes 3808 m elevation gain</span></code></pre>
+        </div>
+    </div>
+
+    <!-- ── Additional Methods ── -->
+    <h2>Additional Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">elevation_difference</span>(<span class="sig-param">other: Point3D</span>) → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns <code>other.elevation − self.elevation</code>. A positive result means
+                <code>other</code> is higher; a negative result means <code>other</code> is lower.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>other</code></td><td><span class="badge badge-type">Point3D</span></td><td>The other point. Must be a <code>Point3D</code>.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> Signed elevation difference in metres (<code>float</code>).</p>
+            <pre><code>base.elevation_difference(summit)   <span class="cm"># +3808.0</span>
+summit.elevation_difference(base)   <span class="cm"># -3808.0</span></code></pre>
+        </div>
+    </div>
+
+    <!-- ── Special Methods ── -->
+    <h2>Special Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__eq__</span>(<span class="sig-param">other: object</span>) → <span class="sig-ret">bool</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns <code>True</code> if <code>other</code> is a <code>Point3D</code> with
+                identical <code>latitude</code>, <code>longitude</code>, and <code>elevation</code>.
+                A <code>Point3D</code> and a <code>Point2D</code> at the same lat/lon are
+                <strong>not</strong> considered equal.
+            </p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__repr__</span>() → <span class="sig-ret">str</span>
+        </div>
+        <div class="method-body">
+            <p>Returns a string such as <code>Point3D(lat=45.8326, lon=6.8652, elev=4808.0)</code>.</p>
+        </div>
+    </div>
+
+    <h2>See Also</h2>
+    <ul>
+        <li><a href="point2d.html">Point2D</a> — 2-D base class</li>
+        <li><a href="track.html">Track</a> — ordered sequence of points (supports mixed 2-D/3-D)</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

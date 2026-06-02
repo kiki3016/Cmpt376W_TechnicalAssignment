@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GpxData – geolib Reference</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> <a href="index.html">Reference</a>
+        <span>›</span> GpxData
+    </div>
+
+    <h1>GpxData</h1>
+    <p>
+        A read-only container holding the geographic data extracted from a GPX file by
+        <a href="gpxparser.html"><code>GpxParser</code></a>. It groups the data into three
+        categories: tracks, waypoints, and routes.
+    </p>
+    <p>
+        You do not construct <code>GpxData</code> directly; it is always returned by
+        <code>GpxParser.parse()</code> or <code>GpxParser.parse_string()</code>.
+    </p>
+
+    <!-- ── Properties ── -->
+    <h2>Properties</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">tracks</span> → <span class="sig-ret">tuple[Track, ...]</span>
+        </div>
+        <div class="method-body">
+            <p>
+                An immutable sequence of <a href="track.html"><code>Track</code></a> objects
+                corresponding to the <code>&lt;trk&gt;</code> elements in the GPX file.
+                Empty tuple if the file contained no tracks.
+            </p>
+            <pre><code><span class="kw">for</span> track <span class="kw">in</span> data.tracks:
+    <span class="bi">print</span>(track.name, track.total_distance() / <span class="nm">1000</span>, <span class="st">"km"</span>)</code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">waypoints</span> → <span class="sig-ret">tuple[Point2D, ...]</span>
+        </div>
+        <div class="method-body">
+            <p>
+                An immutable sequence of <a href="point2d.html"><code>Point2D</code></a> (or
+                <a href="point3d.html"><code>Point3D</code></a>) objects corresponding to the
+                <code>&lt;wpt&gt;</code> elements in the GPX file.
+                Empty tuple if the file contained no waypoints.
+            </p>
+            <pre><code><span class="kw">for</span> wpt <span class="kw">in</span> data.waypoints:
+    <span class="bi">print</span>(wpt)</code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">routes</span> → <span class="sig-ret">tuple[Track, ...]</span>
+        </div>
+        <div class="method-body">
+            <p>
+                An immutable sequence of <a href="track.html"><code>Track</code></a> objects
+                corresponding to the <code>&lt;rte&gt;</code> (route) elements in the GPX file.
+                Routes are planned paths, as opposed to recorded tracks.
+                Empty tuple if the file contained no routes.
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Methods ── -->
+    <h2>Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">all_points</span>() → <span class="sig-ret">list[Point2D]</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns a flat list of every geographic point in the file: all track points,
+                all waypoints, and all route points, in that order.
+            </p>
+            <p>Useful for computing a single bounding box or doing a bulk containment check over everything in the file.</p>
+            <pre><code>all_pts = data.all_points()
+box = BoundingBox.from_points(all_pts)
+<span class="bi">print</span>(<span class="st">f"Total points: {len(all_pts)}"</span>)</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Special Methods ── -->
+    <h2>Special Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__repr__</span>() → <span class="sig-ret">str</span>
+        </div>
+        <div class="method-body">
+            <p>Returns a string such as <code>GpxData(tracks=1, waypoints=3, routes=0)</code>.</p>
+        </div>
+    </div>
+
+    <h2>See Also</h2>
+    <ul>
+        <li><a href="gpxparser.html">GpxParser</a> — creates <code>GpxData</code> instances</li>
+        <li><a href="track.html">Track</a> — represents each parsed track or route</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>geolib – Python GIS Library</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Top Header ── -->
+<header class="top-header">
+    <a class="brand" href="index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="tutorial.html">Tutorial</a>
+        <a href="reference/index.html">Reference</a>
+    </nav>
+</header>
+
+<!-- ── Hero ── -->
+<section class="hero">
+    <h1><span>geo</span>lib</h1>
+    <p>A Python library for working with geographic information: points, polygons, tracks, and GPX data. Clean, composable, and easy to use.</p>
+    <div class="hero-actions">
+        <a class="btn btn-primary" href="tutorial.html">Get Started</a>
+        <a class="btn btn-outline" href="reference/index.html">API Reference</a>
+    </div>
+</section>
+
+<!-- ── Main content ── -->
+<main class="page-body">
+
+    <h2>Overview</h2>
+    <p>
+        <strong>geolib</strong> provides the building blocks for geographic information systems (GIS) applications. It handles the tricky parts of working with geographic coordinates so you can focus on your application logic.
+    </p>
+    <p>
+        The library is built around a small set of composable classes that represent geographic primitives. You can combine them to implement a wide range of GIS functionality—from finding the farthest pair of points in a dataset, to checking whether a coordinate falls inside a country's borders, to processing GPS tracks from wearable devices.
+    </p>
+
+    <h2>Core Classes</h2>
+
+    <div class="card-grid">
+        <a class="card" href="reference/point2d.html">
+            <div class="card-icon">📍</div>
+            <h3>Point2D</h3>
+            <p>A geographic coordinate with latitude and longitude.</p>
+        </a>
+        <a class="card" href="reference/point3d.html">
+            <div class="card-icon">🗻</div>
+            <h3>Point3D</h3>
+            <p>A 3D coordinate that adds elevation to <code>Point2D</code>.</p>
+        </a>
+        <a class="card" href="reference/boundingbox.html">
+            <div class="card-icon">🔲</div>
+            <h3>BoundingBox</h3>
+            <p>An axis-aligned geographic rectangle used for spatial filtering.</p>
+        </a>
+        <a class="card" href="reference/polygon.html">
+            <div class="card-icon">🗺️</div>
+            <h3>Polygon</h3>
+            <p>A closed region defined by an ordered list of vertices.</p>
+        </a>
+        <a class="card" href="reference/track.html">
+            <div class="card-icon">🛤️</div>
+            <h3>Track</h3>
+            <p>An ordered sequence of points representing a journey or path.</p>
+        </a>
+        <a class="card" href="reference/gpxparser.html">
+            <div class="card-icon">📂</div>
+            <h3>GpxParser</h3>
+            <p>Reads GPX files and returns structured <code>GpxData</code>.</p>
+        </a>
+        <a class="card" href="reference/gpxdata.html">
+            <div class="card-icon">📦</div>
+            <h3>GpxData</h3>
+            <p>Container for all data extracted from a GPX file.</p>
+        </a>
+    </div>
+
+    <h2>Quick Example</h2>
+    <p>Install the library, then import the classes you need:</p>
+
+    <pre><code><span class="kw">from</span> geolib <span class="kw">import</span> Point2D, Polygon, Track, GpxParser
+
+<span class="cm"># Create two geographic points</span>
+vancouver = Point2D(<span class="nm">49.2827</span>, <span class="nm">-123.1207</span>)
+seattle   = Point2D(<span class="nm">47.6062</span>, <span class="nm">-122.3321</span>)
+
+<span class="cm"># Straight-line distance in metres</span>
+dist = vancouver.<span class="fn">distance_to</span>(seattle)
+<span class="bi">print</span>(<span class="st">f"Vancouver → Seattle: {dist / 1000:.1f} km"</span>)
+<span class="cm"># Vancouver → Seattle: 232.8 km</span>
+
+<span class="cm"># Check whether a point lies inside a polygon</span>
+border = Polygon([
+    Point2D(<span class="nm">49.0</span>, <span class="nm">-123.5</span>),
+    Point2D(<span class="nm">49.0</span>, <span class="nm">-122.5</span>),
+    Point2D(<span class="nm">49.5</span>, <span class="nm">-122.5</span>),
+    Point2D(<span class="nm">49.5</span>, <span class="nm">-123.5</span>),
+])
+<span class="bi">print</span>(border.<span class="fn">contains</span>(vancouver))   <span class="cm"># True</span>
+<span class="bi">print</span>(border.<span class="fn">contains</span>(seattle))     <span class="cm"># False</span></code></pre>
+
+    <h2>Design Philosophy</h2>
+    <ul>
+        <li><strong>Composable primitives.</strong> Each class does one thing well. Build complex operations by combining them.</li>
+        <li><strong>No side effects.</strong> Methods that compute new geographic values return new objects; they do not modify their inputs.</li>
+        <li><strong>Consistent units.</strong> Distances are always in <em>metres</em>. Angles are always in <em>degrees</em>. Elevations are always in <em>metres above datum</em>.</li>
+        <li><strong>Graceful 2D/3D mixing.</strong> <code>Point3D</code> is a subclass of <code>Point2D</code>. Methods that accept <code>Point2D</code> also accept <code>Point3D</code>; elevation is used when both operands carry it.</li>
+    </ul>
+
+    <h2>Documentation Sections</h2>
+    <ul>
+        <li><a href="tutorial.html">Tutorial</a> — A step-by-step walkthrough covering the main use-cases, with code examples.</li>
+        <li><a href="reference/index.html">API Reference</a> — Complete documentation for every class and method.</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

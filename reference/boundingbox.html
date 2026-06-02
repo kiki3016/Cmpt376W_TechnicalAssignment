@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoundingBox – geolib Reference</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> <a href="index.html">Reference</a>
+        <span>›</span> BoundingBox
+    </div>
+
+    <h1>BoundingBox</h1>
+    <p>
+        An axis-aligned geographic rectangle defined by its north, south, east, and west edges.
+        Bounding boxes are commonly used for fast spatial filtering before more expensive operations
+        such as polygon containment tests.
+    </p>
+
+    <div class="callout callout-warn">
+        <p>
+            <strong>Anti-meridian note:</strong> <code>BoundingBox</code> does <em>not</em> handle
+            regions that span the 180° anti-meridian (e.g. a box covering Fiji). If your region
+            crosses the anti-meridian, split it into two boxes.
+        </p>
+    </div>
+
+    <!-- ── Constructor ── -->
+    <h2>Constructor</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span>
+            <span class="sig-name">BoundingBox</span>(<span class="sig-param">north: float</span>,
+            <span class="sig-param">south: float</span>,
+            <span class="sig-param">east: float</span>,
+            <span class="sig-param">west: float</span>)
+        </div>
+        <div class="method-body">
+            <p>Create a bounding box from its four edges.</p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>north</code></td><td><span class="badge badge-type">float</span></td><td>Maximum latitude (top edge). Must be ≥ <code>south</code>.</td></tr>
+                    <tr><td><code>south</code></td><td><span class="badge badge-type">float</span></td><td>Minimum latitude (bottom edge).</td></tr>
+                    <tr><td><code>east</code></td><td><span class="badge badge-type">float</span></td><td>Maximum longitude (right edge). Must be ≥ <code>west</code>.</td></tr>
+                    <tr><td><code>west</code></td><td><span class="badge badge-type">float</span></td><td>Minimum longitude (left edge).</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Raises:</strong> <code>ValueError</code> if <code>north &lt; south</code> or <code>east &lt; west</code>.</p>
+            <pre><code>box = BoundingBox(north=<span class="nm">49.5</span>, south=<span class="nm">49.0</span>, east=<span class="nm">-122.5</span>, west=<span class="nm">-123.5</span>)</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Properties ── -->
+    <h2>Properties</h2>
+
+    <div class="method-block">
+        <div class="method-sig"><span class="sig-name">north</span> → <span class="sig-ret">float</span></div>
+        <div class="method-body"><p>Maximum latitude (northern edge). Read-only.</p></div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig"><span class="sig-name">south</span> → <span class="sig-ret">float</span></div>
+        <div class="method-body"><p>Minimum latitude (southern edge). Read-only.</p></div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig"><span class="sig-name">east</span> → <span class="sig-ret">float</span></div>
+        <div class="method-body"><p>Maximum longitude (eastern edge). Read-only.</p></div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig"><span class="sig-name">west</span> → <span class="sig-ret">float</span></div>
+        <div class="method-body"><p>Minimum longitude (western edge). Read-only.</p></div>
+    </div>
+
+    <!-- ── Class Methods ── -->
+    <h2>Class Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-kw">@classmethod</span><br>
+            <span class="sig-name">from_points</span>(<span class="sig-param">points: list[Point2D]</span>) → <span class="sig-ret">BoundingBox</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Creates the smallest <code>BoundingBox</code> that contains every point in
+                <code>points</code>.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>points</code></td><td><span class="badge badge-type">list[Point2D]</span></td><td>A non-empty list of geographic points. May contain <code>Point3D</code> values (elevation is ignored).</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> A new <code>BoundingBox</code>.</p>
+            <p><strong>Raises:</strong> <code>ValueError</code> if <code>points</code> is empty.</p>
+            <pre><code>cities = [paris, london, berlin, madrid]
+box = BoundingBox.from_points(cities)</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Instance Methods ── -->
+    <h2>Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">contains</span>(<span class="sig-param">point: Point2D</span>) → <span class="sig-ret">bool</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns <code>True</code> if <code>point</code> falls within (or on the boundary of)
+                this bounding box.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>point</code></td><td><span class="badge badge-type">Point2D</span></td><td>The point to test. May be a <code>Point3D</code> (elevation is ignored).</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> <code>bool</code>.</p>
+            <pre><code>box.contains(paris)    <span class="cm"># True</span>
+box.contains(toronto)  <span class="cm"># False</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">center</span>() → <span class="sig-ret">Point2D</span>
+        </div>
+        <div class="method-body">
+            <p>Returns the geographic centre of the bounding box as a <code>Point2D</code>.</p>
+            <pre><code>box.center()   <span class="cm"># Point2D(lat=49.25, lon=-123.0)</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">expand</span>(<span class="sig-param">point: Point2D</span>) → <span class="sig-ret">BoundingBox</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns a new <code>BoundingBox</code> that is the smallest box containing both this
+                box <em>and</em> <code>point</code>. If <code>point</code> already falls inside this
+                box the original box is returned unchanged.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>point</code></td><td><span class="badge badge-type">Point2D</span></td><td>The point to include. May be a <code>Point3D</code>.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> A new <code>BoundingBox</code>. This box is not modified.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">intersects</span>(<span class="sig-param">other: BoundingBox</span>) → <span class="sig-ret">bool</span>
+        </div>
+        <div class="method-body">
+            <p>Returns <code>True</code> if this box and <code>other</code> overlap (share any area or edge).</p>
+        </div>
+    </div>
+
+    <!-- ── Special Methods ── -->
+    <h2>Special Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__eq__</span>(<span class="sig-param">other: object</span>) → <span class="sig-ret">bool</span>
+        </div>
+        <div class="method-body">
+            <p>Returns <code>True</code> if <code>other</code> is a <code>BoundingBox</code> with identical <code>north</code>, <code>south</code>, <code>east</code>, and <code>west</code> values.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__repr__</span>() → <span class="sig-ret">str</span>
+        </div>
+        <div class="method-body">
+            <p>Returns a string such as <code>BoundingBox(N=49.5, S=49.0, E=-122.5, W=-123.5)</code>.</p>
+        </div>
+    </div>
+
+    <h2>See Also</h2>
+    <ul>
+        <li><a href="polygon.html">Polygon</a> — more precise (but more expensive) containment test</li>
+        <li><a href="track.html">Track.bounding_box()</a> — compute a track's bounding box</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

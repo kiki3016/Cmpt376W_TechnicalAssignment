@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polygon – geolib Reference</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="../index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="../tutorial.html">Tutorial</a>
+        <a href="index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="../index.html">geolib</a>
+        <span>›</span> <a href="index.html">Reference</a>
+        <span>›</span> Polygon
+    </div>
+
+    <h1>Polygon</h1>
+    <p>
+        A closed geographic region defined by an ordered list of vertices (geographic points).
+        The boundary is formed by connecting each vertex to the next in order, with the last
+        vertex connected back to the first.
+    </p>
+    <p>
+        A <code>Polygon</code> is intended to represent real-world geographic regions such as
+        country or province borders, bodies of water, or administrative zones. The primary
+        operation it supports is testing whether an arbitrary point lies inside the region.
+    </p>
+
+    <div class="callout callout-note">
+        <p>
+            <strong>Winding order:</strong> Vertices may be listed in either clockwise or
+            counter-clockwise order; geolib normalises internally. Self-intersecting polygons
+            produce undefined results from <code>contains</code> and <code>area</code>.
+        </p>
+    </div>
+
+    <!-- ── Constructor ── -->
+    <h2>Constructor</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-class">class</span>
+            <span class="sig-name">Polygon</span>(<span class="sig-param">vertices: list[Point2D]</span>)
+        </div>
+        <div class="method-body">
+            <p>Create a polygon from an ordered list of vertices.</p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><code>vertices</code></td>
+                        <td><span class="badge badge-type">list[Point2D]</span></td>
+                        <td>
+                            At least 3 geographic points. The polygon is automatically closed
+                            (you do not need to repeat the first point at the end).
+                            <code>Point3D</code> values are accepted; elevation is ignored.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Raises:</strong> <code>ValueError</code> if fewer than 3 vertices are supplied.</p>
+            <pre><code>canada = Polygon([
+    Point2D(<span class="nm">60.0</span>, <span class="nm">-137.0</span>),
+    Point2D(<span class="nm">60.0</span>, <span class="nm">-95.0</span>),
+    Point2D(<span class="nm">49.0</span>, <span class="nm">-95.0</span>),
+    Point2D(<span class="nm">49.0</span>, <span class="nm">-123.0</span>),
+    <span class="cm"># ... real border data would have many more points</span>
+])</code></pre>
+        </div>
+    </div>
+
+    <!-- ── Properties ── -->
+    <h2>Properties</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">vertices</span> → <span class="sig-ret">tuple[Point2D, ...]</span>
+        </div>
+        <div class="method-body">
+            <p>
+                An immutable sequence of the polygon's vertices in the order they were provided.
+                The closing edge (last-to-first vertex) is implicit and not represented here.
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Methods ── -->
+    <h2>Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">contains</span>(<span class="sig-param">point: Point2D</span>) → <span class="sig-ret">bool</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns <code>True</code> if <code>point</code> is inside (or exactly on the
+                boundary of) this polygon. Uses the ray-casting algorithm, which is correct for
+                simple (non-self-intersecting) polygons.
+            </p>
+            <table class="params-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>point</code></td><td><span class="badge badge-type">Point2D</span></td><td>The point to test. <code>Point3D</code> is accepted; elevation is ignored.</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Returns:</strong> <code>bool</code></p>
+            <pre><code>canada.contains(Point2D(<span class="nm">45.4215</span>, <span class="nm">-75.6972</span>))   <span class="cm"># True  (Ottawa)</span>
+canada.contains(Point2D(<span class="nm">47.6062</span>, <span class="nm">-122.3321</span>))  <span class="cm"># False (Seattle)</span></code></pre>
+            <div class="callout callout-tip">
+                <p>
+                    <strong>Performance:</strong> Call <code>bounding_box().contains(point)</code> first
+                    as a fast pre-filter. Only proceed to <code>contains</code> for points that pass
+                    the bounding-box test.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">perimeter</span>() → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the total length of the polygon's boundary in <strong>metres</strong>,
+                calculated as the sum of the great-circle distances between consecutive vertices
+                (including the closing edge from the last vertex back to the first).
+            </p>
+            <pre><code>canada.perimeter()   <span class="cm"># total border length in metres</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">area</span>() → <span class="sig-ret">float</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the approximate area enclosed by the polygon in <strong>square metres</strong>,
+                computed using the spherical excess formula. The result is an approximation that
+                becomes less accurate for very large polygons (continent scale).
+            </p>
+            <pre><code>canada.area()   <span class="cm"># ≈ 9.98e12 m² for a full border</span></code></pre>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">bounding_box</span>() → <span class="sig-ret">BoundingBox</span>
+        </div>
+        <div class="method-body">
+            <p>
+                Returns the smallest <a href="boundingbox.html"><code>BoundingBox</code></a> that
+                encloses all of the polygon's vertices.
+            </p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">vertex_count</span>() → <span class="sig-ret">int</span>
+        </div>
+        <div class="method-body">
+            <p>Returns the number of vertices (equivalently, the number of edges).</p>
+            <pre><code>canada.vertex_count()   <span class="cm"># number of border points</span></code></pre>
+        </div>
+    </div>
+
+    <!-- ── Special Methods ── -->
+    <h2>Special Methods</h2>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__len__</span>() → <span class="sig-ret">int</span>
+        </div>
+        <div class="method-body">
+            <p>Equivalent to <code>vertex_count()</code>. Allows <code>len(polygon)</code>.</p>
+        </div>
+    </div>
+
+    <div class="method-block">
+        <div class="method-sig">
+            <span class="sig-name">__repr__</span>() → <span class="sig-ret">str</span>
+        </div>
+        <div class="method-body">
+            <p>Returns a string such as <code>Polygon(vertices=4)</code>.</p>
+        </div>
+    </div>
+
+    <h2>See Also</h2>
+    <ul>
+        <li><a href="boundingbox.html">BoundingBox</a> — cheaper rectangular containment test</li>
+        <li><a href="point2d.html">Point2D</a> — vertex type</li>
+    </ul>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>

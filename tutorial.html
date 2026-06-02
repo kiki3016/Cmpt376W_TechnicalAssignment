@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial – geolib</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <a class="brand" href="index.html"><span>geo</span>lib</a>
+    <nav>
+        <a href="tutorial.html">Tutorial</a>
+        <a href="reference/index.html">Reference</a>
+    </nav>
+</header>
+
+<main class="page-body">
+
+    <div class="breadcrumb">
+        <a href="index.html">geolib</a>
+        <span>›</span> Tutorial
+    </div>
+
+    <h1>Tutorial</h1>
+    <p>
+        This tutorial walks through the most common geolib use-cases with working code examples.
+        By the end you will know how to create and measure geographic points, test whether a point
+        falls inside a polygon, analyse a GPS track, and parse a GPX file.
+    </p>
+
+    <!-- ────────────────────────────────────── -->
+    <h2 id="points">1. Working with Geographic Points</h2>
+
+    <h3>Creating points</h3>
+    <p>
+        A <a href="reference/point2d.html"><code>Point2D</code></a> holds a latitude (−90 to 90) and
+        a longitude (−180 to 180). A <a href="reference/point3d.html"><code>Point3D</code></a> extends
+        it with an elevation in metres above datum.
+    </p>
+
+    <pre><code><span class="kw">from</span> geolib <span class="kw">import</span> Point2D, Point3D
+
+<span class="cm"># 2-D points (most common)</span>
+paris  = Point2D(<span class="nm">48.8566</span>, <span class="nm">2.3522</span>)
+london = Point2D(<span class="nm">51.5074</span>, <span class="nm">-0.1278</span>)
+
+<span class="cm"># 3-D point on Mont Blanc</span>
+mont_blanc = Point3D(<span class="nm">45.8326</span>, <span class="nm">6.8652</span>, <span class="nm">4808.0</span>)</code></pre>
+
+    <h3>Measuring distance</h3>
+    <p>
+        <code>distance_to</code> returns the great-circle distance between two points in <strong>metres</strong>.
+        When both points are <code>Point3D</code> instances, the elevation difference is also taken into
+        account (straight-line 3-D distance).
+    </p>
+
+    <pre><code>dist_km = paris.<span class="fn">distance_to</span>(london) / <span class="nm">1000</span>
+<span class="bi">print</span>(<span class="st">f"{dist_km:.1f} km"</span>)   <span class="cm"># 341.6 km</span></code></pre>
+
+    <h3>Bearing between points</h3>
+    <p>
+        <code>bearing_to</code> returns the initial compass bearing from one point to another, in
+        degrees (0 = North, 90 = East, 180 = South, 270 = West).
+    </p>
+
+    <pre><code>bearing = paris.<span class="fn">bearing_to</span>(london)
+<span class="bi">print</span>(<span class="st">f"{bearing:.1f}°"</span>)   <span class="cm"># 334.0° (roughly north-northwest)</span></code></pre>
+
+    <h3>Finding the midpoint</h3>
+    <pre><code>mid = paris.<span class="fn">midpoint</span>(london)
+<span class="bi">print</span>(mid)   <span class="cm"># Point2D(lat=50.18, lon=1.10)</span></code></pre>
+
+    <h3>Translating a point</h3>
+    <p>
+        <code>translate(distance, bearing)</code> returns a new point that is <code>distance</code>
+        metres away from the original in the given bearing direction. Useful for generating test data
+        or constructing circular regions.
+    </p>
+
+    <pre><code><span class="cm"># Point 500 m north of Paris</span>
+north_of_paris = paris.<span class="fn">translate</span>(<span class="nm">500</span>, <span class="nm">0</span>)</code></pre>
+
+    <div class="callout callout-note">
+        <p><strong>Tip:</strong> All distance values in geolib are in <em>metres</em>. Divide by 1,000 for kilometres.</p>
+    </div>
+
+    <!-- ────────────────────────────────────── -->
+    <h2 id="polygon">2. Working with Polygons</h2>
+
+    <p>
+        A <a href="reference/polygon.html"><code>Polygon</code></a> represents a closed geographic region
+        defined by an ordered list of vertices. The most common operation is testing whether a point
+        falls inside the region.
+    </p>
+
+    <h3>Creating a polygon</h3>
+    <pre><code><span class="kw">from</span> geolib <span class="kw">import</span> Polygon
+
+<span class="cm"># Simplified border of a small square region</span>
+region = Polygon([
+    Point2D(<span class="nm">49.0</span>, <span class="nm">-123.5</span>),
+    Point2D(<span class="nm">49.0</span>, <span class="nm">-122.5</span>),
+    Point2D(<span class="nm">49.5</span>, <span class="nm">-122.5</span>),
+    Point2D(<span class="nm">49.5</span>, <span class="nm">-123.5</span>),
+])</code></pre>
+
+    <h3>Point-in-polygon test</h3>
+    <p>
+        <code>contains(point)</code> uses the ray-casting algorithm and returns <code>True</code>
+        if the point lies inside (or on the boundary of) the polygon.
+    </p>
+    <pre><code>vancouver = Point2D(<span class="nm">49.2827</span>, <span class="nm">-123.1207</span>)
+seattle   = Point2D(<span class="nm">47.6062</span>, <span class="nm">-122.3321</span>)
+
+region.<span class="fn">contains</span>(vancouver)   <span class="cm"># True</span>
+region.<span class="fn">contains</span>(seattle)     <span class="cm"># False</span></code></pre>
+
+    <h3>Practical example: finding Wikipedia articles within a country</h3>
+    <p>
+        Suppose you have a <code>Polygon</code> describing Canada's border and a list of geotagged
+        Wikipedia coordinates. You want all articles whose coordinates fall inside Canada.
+    </p>
+    <pre><code><span class="cm"># canada_border: Polygon loaded from a data file</span>
+<span class="cm"># articles: list of (title, Point2D) tuples</span>
+
+inside_canada = [
+    title
+    <span class="kw">for</span> title, point <span class="kw">in</span> articles
+    <span class="kw">if</span> canada_border.<span class="fn">contains</span>(point)
+]</code></pre>
+
+    <h3>Polygon measurements</h3>
+    <pre><code>region.<span class="fn">perimeter</span>()        <span class="cm"># total boundary length, metres</span>
+region.<span class="fn">area</span>()             <span class="cm"># enclosed area, square metres</span>
+region.<span class="fn">bounding_box</span>()    <span class="cm"># BoundingBox that tightly encloses the polygon</span>
+region.<span class="fn">vertex_count</span>()    <span class="cm"># 4</span></code></pre>
+
+    <!-- ────────────────────────────────────── -->
+    <h2 id="boundingbox">3. Working with Bounding Boxes</h2>
+
+    <p>
+        A <a href="reference/boundingbox.html"><code>BoundingBox</code></a> is an axis-aligned rectangle
+        defined by its north, south, east, and west edges. Bounding-box tests are much faster than
+        full polygon tests, so they are a good first filter.
+    </p>
+
+    <pre><code><span class="kw">from</span> geolib <span class="kw">import</span> BoundingBox
+
+<span class="cm"># Construct directly</span>
+box = BoundingBox(north=<span class="nm">49.5</span>, south=<span class="nm">49.0</span>, east=<span class="nm">-122.5</span>, west=<span class="nm">-123.5</span>)
+
+<span class="cm"># Or derive it from a collection of points</span>
+points = [vancouver, seattle, paris, london]
+box = BoundingBox.<span class="fn">from_points</span>(points)
+
+box.<span class="fn">contains</span>(vancouver)   <span class="cm"># True</span>
+box.<span class="fn">center</span>()              <span class="cm"># midpoint of the box</span></code></pre>
+
+    <div class="callout callout-tip">
+        <p><strong>Performance tip:</strong> When filtering a large point set against a complex polygon, first call <code>polygon.bounding_box().contains(point)</code>. Only call the more expensive <code>polygon.contains(point)</code> for points that pass the bounding-box check.</p>
+    </div>
+
+    <!-- ────────────────────────────────────── -->
+    <h2 id="track">4. Working with Tracks</h2>
+
+    <p>
+        A <a href="reference/track.html"><code>Track</code></a> is an ordered sequence of geographic
+        points representing a continuous journey—a hike, a bike ride, a drive. Tracks can consist
+        of <code>Point2D</code> or <code>Point3D</code> objects (or a mix).
+    </p>
+
+    <h3>Creating a track</h3>
+    <pre><code><span class="kw">from</span> geolib <span class="kw">import</span> Track, Point3D
+
+hike = Track([
+    Point3D(<span class="nm">49.2827</span>, <span class="nm">-123.1207</span>, <span class="nm">0.0</span>),
+    Point3D(<span class="nm">49.3000</span>, <span class="nm">-123.1500</span>, <span class="nm">120.0</span>),
+    Point3D(<span class="nm">49.3200</span>, <span class="nm">-123.1800</span>, <span class="nm">350.0</span>),
+    Point3D(<span class="nm">49.3100</span>, <span class="nm">-123.2000</span>, <span class="nm">280.0</span>),
+], name=<span class="st">"Grouse Mountain Hike"</span>)</code></pre>
+
+    <h3>Distance and elevation statistics</h3>
+    <pre><code>hike.<span class="fn">total_distance</span>()      <span class="cm"># total path length, metres</span>
+hike.<span class="fn">elevation_gain</span>()      <span class="cm"># total ascent, metres</span>
+hike.<span class="fn">elevation_loss</span>()      <span class="cm"># total descent, metres</span>
+hike.<span class="fn">highest_point</span>()       <span class="cm"># Point3D with maximum elevation</span>
+hike.<span class="fn">lowest_point</span>()        <span class="cm"># Point3D with minimum elevation</span></code></pre>
+
+    <h3>Segment distances</h3>
+    <p>
+        <code>segment_distances()</code> returns a list of distances between consecutive points.
+        This is useful for detecting large gaps (GPS signal loss) or for time–distance charts.
+    </p>
+    <pre><code>segments = hike.<span class="fn">segment_distances</span>()
+<span class="cm"># [2134.2, 3021.5, 1423.8]  (metres, one value per consecutive pair)</span></code></pre>
+
+    <h3>Practical example: exporting a track for Google Maps</h3>
+    <p>
+        Google Maps Directions accepts an array of <code>{lat, lng}</code> objects. Here is how to
+        convert a <code>Track</code> to that format.
+    </p>
+    <pre><code><span class="kw">def</span> <span class="fn">to_google_path</span>(track: Track) -> list[dict]:
+    <span class="kw">return</span> [
+        {<span class="st">"lat"</span>: p.latitude, <span class="st">"lng"</span>: p.longitude}
+        <span class="kw">for</span> p <span class="kw">in</span> track.points
+    ]
+
+path = to_google_path(hike)</code></pre>
+
+    <h3>Simplifying a track</h3>
+    <p>
+        GPS devices often record far more points than a map needs to draw. <code>simplify</code>
+        reduces the number of points while preserving the shape of the path (Ramer–Douglas–Peucker
+        algorithm). The <code>tolerance</code> parameter controls the maximum allowed deviation in
+        metres.
+    </p>
+    <pre><code>simplified = hike.<span class="fn">simplify</span>(tolerance=<span class="nm">20</span>)   <span class="cm"># 20 m tolerance</span>
+<span class="bi">print</span>(<span class="bi">len</span>(hike.points), <span class="st">"→"</span>, <span class="bi">len</span>(simplified.points), <span class="st">"points"</span>)</code></pre>
+
+    <!-- ────────────────────────────────────── -->
+    <h2 id="gpx">5. Parsing GPX Files</h2>
+
+    <p>
+        GPX (GPS Exchange Format) is the standard XML format produced by GPS devices,
+        fitness trackers, and mapping apps. <a href="reference/gpxparser.html"><code>GpxParser</code></a>
+        reads a GPX file and returns a <a href="reference/gpxdata.html"><code>GpxData</code></a> object
+        containing tracks, waypoints, and routes.
+    </p>
+
+    <pre><code><span class="kw">from</span> geolib <span class="kw">import</span> GpxParser
+
+data = GpxParser.<span class="fn">parse</span>(<span class="st">"my_run.gpx"</span>)
+
+<span class="bi">print</span>(<span class="st">f"Tracks:    {len(data.tracks)}"</span>)
+<span class="bi">print</span>(<span class="st">f"Waypoints: {len(data.waypoints)}"</span>)
+<span class="bi">print</span>(<span class="st">f"Routes:    {len(data.routes)}"</span>)
+
+<span class="cm"># Analyse the first track</span>
+track = data.tracks[<span class="nm">0</span>]
+<span class="bi">print</span>(<span class="st">f"Distance: {track.total_distance() / 1000:.2f} km"</span>)
+<span class="bi">print</span>(<span class="st">f"Gain:     {track.elevation_gain():.0f} m"</span>)</code></pre>
+
+    <h3>Parsing from a string</h3>
+    <p>
+        If you already have the GPX content in memory (e.g. downloaded via HTTP), use
+        <code>parse_string</code> instead.
+    </p>
+    <pre><code><span class="kw">import</span> urllib.request
+
+url = <span class="st">"https://example.com/route.gpx"</span>
+<span class="kw">with</span> urllib.request.<span class="fn">urlopen</span>(url) <span class="kw">as</span> response:
+    xml_content = response.<span class="fn">read</span>().<span class="fn">decode</span>()
+
+data = GpxParser.<span class="fn">parse_string</span>(xml_content)</code></pre>
+
+    <!-- ────────────────────────────────────── -->
+    <h2 id="farthest">6. Finding the Farthest Pair of Points</h2>
+
+    <p>
+        geolib does not provide a "farthest pair" function directly, but <code>Point2D.distance_to</code>
+        makes it easy to write one.
+    </p>
+
+    <pre><code><span class="kw">from</span> itertools <span class="kw">import</span> combinations
+
+<span class="kw">def</span> <span class="fn">farthest_pair</span>(points):
+    <span class="st">"""Return the pair (a, b) from points that are farthest apart."""</span>
+    <span class="kw">return</span> <span class="bi">max</span>(
+        combinations(points, <span class="nm">2</span>),
+        key=<span class="kw">lambda</span> pair: pair[<span class="nm">0</span>].<span class="fn">distance_to</span>(pair[<span class="nm">1</span>])
+    )
+
+cities = [paris, london, vancouver, seattle]
+a, b = farthest_pair(cities)
+<span class="bi">print</span>(<span class="st">f"Farthest: {a} – {b}"</span>)</code></pre>
+
+    <!-- ────────────────────────────────────── -->
+    <h2 id="next">Next Steps</h2>
+    <p>
+        Now that you know the basics, explore the
+        <a href="reference/index.html">API Reference</a> for the full details on every class and method.
+    </p>
+
+</main>
+
+<footer class="site-footer">
+    geolib — Geographic Information Library &nbsp;|&nbsp; Documentation
+</footer>
+
+</body>
+</html>
